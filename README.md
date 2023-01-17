@@ -3,11 +3,7 @@
 ## Quick start
 Start database in Docker container
 ```
-docker run --name ciplay_db -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
-docker cp sql_scripts/create_db.sql ciplay_db:/docker-entrypoint-initdb.d/create_db.sql
-docker cp sql_scripts/procedures.sql ciplay_db:/docker-entrypoint-initdb.d/procedures.sql
-docker exec -u postgres ciplay_db psql postgres postgres -f docker-entrypoint-initdb.d/create_db.sql
-docker exec -u postgres ciplay_db psql postgres postgres -f docker-entrypoint-initdb.d/procedures.sql
+make database
 ```
 Start API in Docker container
 ```

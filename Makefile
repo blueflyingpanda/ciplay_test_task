@@ -1,7 +1,7 @@
 DOCKER_COMPOSE = docker-compose
 DOCKER_COMPOSE_FILE = docker-compose.yaml
 
-.PHONY: start stop restart status clean test
+.PHONY: start stop restart status clean test database
 
 start: ## Start all or c=<name> containers
 	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up -d $(c)
