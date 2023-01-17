@@ -68,10 +68,3 @@ BEGIN
         DESC;
 END;
 $$ LANGUAGE plpgsql;
-
-
-
-UPDATE ciplay_stats SET
-cost = COALESCE(cost + 100, cost, 100),
-views = COALESCE(views + 100, views, 100),
-clicks = COALESCE(clicks + 100, clicks, 100)
