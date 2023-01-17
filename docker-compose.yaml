@@ -1,0 +1,8 @@
+version: "0.1.0"
+services:
+  http:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    ports:
+      - "8092:8000"

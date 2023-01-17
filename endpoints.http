@@ -1,0 +1,17 @@
+# Endpoints examples
+
+GET http://127.0.0.1:8000/stats?from=2022-01-17&to=2023-01-17&order=views&direction=DESC
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/stats
+Accept: application/json
+
+{"date": "2022-05-23", "views": 100, "clicks": 10, "cost": 1.5}
+###
+
+DELETE http://127.0.0.1:8000/stats
+Accept: application/json
+
+###
