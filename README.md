@@ -1,11 +1,8 @@
 # Test task CIPLAY
 
 ## Quick start
-Start database in Docker container
-```
-make database
-```
-Start API in Docker container
+
+Start API in Docker container and Database in another Docker container
 ```
 make start
 ```

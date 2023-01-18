@@ -32,7 +32,7 @@ async def show_stats(order: Order = Depends(),
     finally:
         connection.close()
         db_pool.putconn(connection)
-
+    logger.info("Stats are retrieved")
     return result
 
 

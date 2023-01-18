@@ -1,8 +1,33 @@
 version: "0.1.0"
 services:
-  http:
+  db:
+    build:
+      dockerfile: DockerfilePostgres
+      context: ./
+    ports:
+      - "5432:5432"
+    user: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    networks:
+      - my-network
+    healthcheck:
+      test: /usr/bin/pg_isready
+      interval: 5s
+      timeout: 10s
+      retries: 120
+  api:
     build:
       dockerfile: Dockerfile
       context: ./
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - my-network
     ports:
-      - "8092:8000"
+      - "8000:8000"
+
+networks:
+  my-network :
