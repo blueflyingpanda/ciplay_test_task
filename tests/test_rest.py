@@ -7,9 +7,6 @@ from main import app
 
 
 def setup():
-    print('SETUP!')
-    from os import environ
-    print('!!!', environ.get('POSTGRES_USER'), environ.get('POSTGRES_PASSWORD'), environ.get('DB_SERVICE_NAME'), environ.get('DB_PORT'), environ.get('POSTGRES_DATABASE'), '!!!')
     connection = None
     try:
         with db_pool.getconn() as connection:
@@ -31,7 +28,6 @@ def setup():
 
 
 def teardown():
-    print('TEARDOWN!')
     connection = None
     try:
         with db_pool.getconn() as connection:
@@ -48,9 +44,11 @@ def teardown():
         db_pool.closeall()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def test_app():
-    yield TestClient(app)
+    client = TestClient(app)
+    yield client
+    client.delete('/stats')
 
 
 def test_one_entry(test_app):
@@ -60,13 +58,147 @@ def test_one_entry(test_app):
         "date": "2022-05-23",
         "views": 10,
         "clicks": 5,
-        "cost": 1.0
+        "cost": 10.0
     })
     assert response.json().get('message') == "Stats saved"
     response = test_app.get('/stats?from=2022-01-17&to=2023-01-17')
-    response.json() == [{
+    assert response.json() == [{
         "date": "2022-05-23",
         "views": 10,
         "clicks": 5,
-        "cost": 1.0
+        "cost": 10.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+
+
+def test_one_entry_duplication(test_app):
+    response = test_app.post('/stats', json={
+        "date": "2022-05-23",
+        "views": 10,
+        "clicks": 5,
+        "cost": 10.0
+    })
+    assert response.json().get('message') == "Stats saved"
+    response = test_app.post('/stats', json={
+        "date": "2022-05-23",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0
+    })
+    assert response.json().get('message') == "Stats saved"
+    response = test_app.get('/stats?from=2022-01-17&to=2023-01-17')
+    assert response.json() == [{
+        "date": "2022-05-23",
+        "views": 30,
+        "clicks": 15,
+        "cost": 30.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+
+
+def test_more_than_one_entry(test_app):
+    response = test_app.post('/stats', json={
+        "date": "2022-05-23",
+        "views": 10,
+        "clicks": 5,
+        "cost": 10.0
+    })
+    assert response.json().get('message') == "Stats saved"
+    response = test_app.post('/stats', json={
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0
+    })
+    assert response.json().get('message') == "Stats saved"
+    response = test_app.get('/stats?from=2022-01-17&to=2023-01-17')
+    assert response.json() == [{
+        "date": "2022-05-23",
+        "views": 10,
+        "clicks": 5,
+        "cost": 10.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }, {
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+    response = test_app.get('/stats?from=2022-01-17&to=2022-06-17')
+    assert response.json() == [{
+        "date": "2022-05-23",
+        "views": 10,
+        "clicks": 5,
+        "cost": 10.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+    response = test_app.get('/stats?from=2022-06-17&to=2022-09-17')
+    assert response.json() == [{
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+    response = test_app.get('/stats?from=2022-01-17&to=2023-01-17&direction=DESC')
+    assert response.json() == [{
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }, {
+        "date": "2022-05-23",
+        "views": 10,
+        "clicks": 5,
+        "cost": 10.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+    response = test_app.post('/stats', json={
+        "date": "2022-05-23",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0
+    })
+    assert response.json().get('message') == "Stats saved"
+    response = test_app.get('/stats?from=2022-01-17&to=2023-01-17&direction=DESC')
+    assert response.json() == [{
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }, {
+        "date": "2022-05-23",
+        "views": 30,
+        "clicks": 15,
+        "cost": 30.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }]
+    response = test_app.get('/stats?from=2022-01-17&to=2023-01-17&direction=DESC&order=views')
+    assert response.json() == [{
+        "date": "2022-05-23",
+        "views": 30,
+        "clicks": 15,
+        "cost": 30.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
+    }, {
+        "date": "2022-08-05",
+        "views": 20,
+        "clicks": 10,
+        "cost": 20.0,
+        "cpc": 2.0,
+        "cpm": 1000.0
     }]
