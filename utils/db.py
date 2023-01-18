@@ -1,5 +1,5 @@
 import sys
-
+from os import environ
 from psycopg2.pool import ThreadedConnectionPool
 from utils.config import conf
 
@@ -8,11 +8,11 @@ db_pool = None
 
 try:
     db_conf = conf['database']
-    db_pool = ThreadedConnectionPool(user=db_conf['user'],
-                                     password=db_conf['password'],
-                                     host=db_conf['host'],
-                                     port=db_conf['port'],
-                                     database=db_conf['database'],
+    db_pool = ThreadedConnectionPool(user=environ.get('POSTGRES_USER'),
+                                     password=environ.get('POSTGRES_PASSWORD'),
+                                     host=environ.get('DB_SERVICE_NAME'),
+                                     port=environ.get('DB_PORT'),
+                                     database=environ.get('POSTGRES_DATABASE'),
                                      minconn=db_conf['min_connections'],
                                      maxconn=db_conf['max_connections'])
 except KeyError as e:

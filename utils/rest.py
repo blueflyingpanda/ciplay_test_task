@@ -1,20 +1,15 @@
 import psycopg2
 
-from fastapi import FastAPI, Query, Depends
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Query, Depends
 from utils.db import db_pool
 from utils.log import logger
 from utils.stats import Stats, Order, OrderDirection
 
-app = FastAPI()
+
+router = APIRouter()
 
 
-@app.get("/")
-async def root():
-    return RedirectResponse(url=app.docs_url)
-
-
-@app.get("/stats")
+@router.get("/stats")
 async def show_stats(order: Order = Depends(),
                      direction: OrderDirection = Depends(),
                      _from: str = Query(alias="from"),
@@ -36,7 +31,7 @@ async def show_stats(order: Order = Depends(),
     return result
 
 
-@app.post("/stats")
+@router.post("/stats")
 async def save_stats(stats: Stats):
     try:
         with db_pool.getconn() as connection:
@@ -54,7 +49,7 @@ async def save_stats(stats: Stats):
     return {"message": "Stats saved", "stats_id": inserted_id}
 
 
-@app.delete("/stats")
+@router.delete("/stats")
 async def reset_stats():
     try:
         with db_pool.getconn() as connection:

@@ -3,6 +3,3 @@ FROM postgres
 # Copy the init scripts
 COPY sql_scripts/* /docker-entrypoint-initdb.d/
 RUN chmod 0755 /docker-entrypoint-initdb.d/
-
-# Expose the port for the application
-EXPOSE 5432

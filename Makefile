@@ -1,7 +1,7 @@
 DOCKER_COMPOSE = docker-compose
 DOCKER_COMPOSE_FILE = docker-compose.yaml
 
-.PHONY: start stop restart status clean test database
+.PHONY: start stop restart status clean test test_local
 
 start: ## Start all or c=<name> containers
 	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up -d $(c)
@@ -22,5 +22,14 @@ logs: ## Show logs for all or c=<name> containers
 clean: ## Clean all data
 	@$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down
 
-test: ## Run tests
-	echo 'TESTING...'
+test_local: ## Run tests
+	export API_PORT=8000  &&\
+	export DB_PORT=5432 &&\
+	export POSTGRES_USER=ciplay &&\
+	export POSTGRES_DATABASE=ciplay &&\
+	export POSTGRES_PASSWORD=ciplay &&\
+	export DB_SERVICE_NAME=localhost &&\
+	python -m pytest tests/;
+
+test: ## Run tests in Docker
+	 docker-compose exec api python -m pytest tests/

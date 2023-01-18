@@ -3,3 +3,5 @@ psycopg2-binary
 uvicorn
 psycopg2
 pydantic
+httpx
+pytest

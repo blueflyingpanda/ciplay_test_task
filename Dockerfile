@@ -6,17 +6,17 @@ WORKDIR /app
 # Copy the requirements file
 COPY requirements.txt .
 
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 # Install the dependencies
 RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
+    && apt-get -y install libpq-dev gcc
 RUN pip install --no-cache-dir -r requirements.txt
+
 
 # Copy the application code
 COPY . .
 
-# Expose the port for the application
-EXPOSE 8000
-
-# Running Python Application
-CMD sh docker-startup.sh
+CMD uvicorn main:app --host 0.0.0.0 --port ${API_PORT}

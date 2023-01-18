@@ -1,20 +1,23 @@
-import sys
-import uvicorn
-
-from utils.config import conf
+from fastapi import FastAPI
 from utils.db import db_pool
-from utils.rest import app
+from utils.rest import router
+from fastapi.responses import RedirectResponse
+
+app = FastAPI()
+app.include_router(router)
 
 
-def main():
-    try:
-        rest_conf = conf['restful_api']
-        uvicorn.run(app, host=rest_conf['host'], port=int(rest_conf['port']))
-    except Exception as e:
-        print(f"Configuration file is invalid: {e}", file=sys.stderr)
+@app.get("/")
+async def root():
+    return RedirectResponse(url=app.docs_url)
 
 
-if __name__ == '__main__':
-    main()
+@app.on_event("startup")
+async def startup():
+    pass
+
+
+@app.on_event("shutdown")
+async def shutdown():
     if db_pool:
         db_pool.closeall()
